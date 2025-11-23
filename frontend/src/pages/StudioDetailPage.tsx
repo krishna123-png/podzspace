@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { studiosAPI, bookingsAPI } from '@/lib/api'
-import { MapPin, Users, Star, X, CreditCard } from 'lucide-react'
+import { MapPin, Star, X, CreditCard } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuthStore } from '@/store/authStore'
 
