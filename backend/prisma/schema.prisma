@@ -1,0 +1,184 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CREATOR
+  STUDIO_OWNER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password      String
+  fullName      String
+  phone         String?
+  role          UserRole
+  profileImage  String?
+  bio           String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  studios       Studio[]        // If studio owner
+  bookings      Booking[]       // If creator
+  reviews       Review[]
+  payments      Payment[]
+
+  @@map("users")
+}
+
+model Studio {
+  id              String   @id @default(uuid())
+  name            String
+  description     String
+  address         String
+  city            String
+  state           String
+  zipCode         String
+  country         String   @default("USA")
+  latitude        Float?
+  longitude       Float?
+  
+  pricePerHour    Float
+  capacity        Int      @default(4)
+  size            Int?     // in sq ft
+  
+  images          String[] // Array of image URLs
+  amenities       String[] // Array of amenities
+  equipment       String[] // Array of equipment
+  
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  ownerId         String
+  owner           User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  bookings        Booking[]
+  reviews         Review[]
+  availability    Availability[]
+
+  @@map("studios")
+}
+
+model Availability {
+  id          String   @id @default(uuid())
+  studioId    String
+  studio      Studio   @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  
+  date        DateTime
+  startTime   String   // "09:00"
+  endTime     String   // "17:00"
+  isAvailable Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([studioId, date, startTime])
+  @@map("availability")
+}
+
+model Booking {
+  id              String        @id @default(uuid())
+  bookingDate     DateTime
+  startTime       String
+  endTime         String
+  totalHours      Int
+  totalPrice      Float
+  platformFee     Float         // Your commission
+  studioEarnings  Float         // What studio owner gets
+  
+  status          BookingStatus @default(PENDING)
+  
+  specialRequests String?
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  // Relations
+  studioId        String
+  studio          Studio        @relation(fields: [studioId], references: [id])
+  
+  creatorId       String
+  creator         User          @relation(fields: [creatorId], references: [id])
+  
+  payment         Payment?
+  review          Review?
+
+  @@map("bookings")
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  amount            Float
+  platformFee       Float
+  studioAmount      Float
+  
+  paymentMethod     String        @default("CARD") // CARD, UPI, CASH
+  transactionId     String?       @unique
+  
+  status            PaymentStatus @default(PENDING)
+  stripePaymentId   String?       @unique
+  stripeTransferId  String?       // Transfer to studio owner
+  
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  
+  // Relations
+  bookingId         String        @unique
+  booking           Booking       @relation(fields: [bookingId], references: [id])
+  
+  userId            String
+  user              User          @relation(fields: [userId], references: [id])
+
+  @@map("payments")
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  rating      Int      // 1-5
+  comment     String?
+  
+  cleanliness Int?     // 1-5
+  equipment   Int?     // 1-5
+  location    Int?     // 1-5
+  value       Int?     // 1-5
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  studioId    String
+  studio      Studio   @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  
+  bookingId   String   @unique
+  booking     Booking  @relation(fields: [bookingId], references: [id])
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("reviews")
+}
