@@ -37,7 +37,7 @@ const OwnerDashboard = () => {
 
       // Calculate stats
       const totalRevenue = bookingsData
-        .reduce((sum: number, b: any) => sum + (b.hours * b.studio.pricePerHour), 0)
+        .reduce((sum: number, b: any) => sum + (b.totalPrice || 0), 0)
 
       setStats({
         totalStudios: studiosData.length,
@@ -162,14 +162,14 @@ const OwnerDashboard = () => {
                   <div className="flex items-center text-sm text-gray-600 space-x-4">
                     <span className="flex items-center">
                       <Calendar className="h-4 w-4 mr-1" />
-                      {booking.startDate ? new Date(booking.startDate).toLocaleDateString() : 'N/A'}
+                      {booking.bookingDate ? new Date(booking.bookingDate).toLocaleDateString() : 'N/A'}
                     </span>
                     <span className="flex items-center">
                       <Clock className="h-4 w-4 mr-1" />
-                      {booking.hours || 0}h
+                      {booking.totalHours || 0}h
                     </span>
                     <span className="text-primary-600 font-semibold ml-auto">
-                      ${booking.hours && booking.studio?.pricePerHour ? (booking.hours * booking.studio.pricePerHour).toFixed(0) : '0'}
+                      ${booking.totalPrice ? booking.totalPrice.toFixed(0) : '0'}
                     </span>
                   </div>
                 </div>
