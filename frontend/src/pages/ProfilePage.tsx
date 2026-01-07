@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { usersAPI } from '@/lib/api'
-import { User, Mail, Phone, MapPin, Edit2, Save, X, Building2, Star } from 'lucide-react'
+import { User, Mail, Phone, MapPin, Edit2, Save, X, Building2, Star, Upload } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const ProfilePage = () => {
   const { user, setUser } = useAuthStore()
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string>(user?.profileImage || '')
   
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
@@ -45,11 +47,38 @@ const ProfilePage = () => {
     })
   }
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB')
+        return
+      }
+      setProfileImageFile(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleSave = async () => {
     setLoading(true)
     try {
-      const response = await usersAPI.updateProfile(formData)
+      const formDataToSend = new FormData()
+      formDataToSend.append('fullName', formData.fullName)
+      formDataToSend.append('phone', formData.phone || '')
+      formDataToSend.append('bio', formData.bio || '')
+      
+      if (profileImageFile) {
+        formDataToSend.append('profileImage', profileImageFile)
+      }
+
+      const response = await usersAPI.updateProfile(formDataToSend)
       setUser(response.data.user)
+      setImagePreview(response.data.user.profileImage || '')
+      setProfileImageFile(null)
       toast.success('Profile updated successfully!')
       setIsEditing(false)
     } catch (error: any) {
@@ -67,6 +96,8 @@ const ProfilePage = () => {
       bio: user?.bio || '',
       profileImage: user?.profileImage || '',
     })
+    setImagePreview(user?.profileImage || '')
+    setProfileImageFile(null)
     setIsEditing(false)
   }
 
@@ -113,9 +144,9 @@ const ProfilePage = () => {
           <div className="flex flex-col md:flex-row gap-6 items-start">
             {/* Profile Image */}
             <div className="flex-shrink-0">
-              {formData.profileImage ? (
+              {imagePreview ? (
                 <img
-                  src={formData.profileImage}
+                  src={imagePreview}
                   alt={formData.fullName}
                   className="w-32 h-32 rounded-full object-cover border-4 border-primary-100"
                 />
@@ -125,14 +156,19 @@ const ProfilePage = () => {
                 </div>
               )}
               {isEditing && (
-                <input
-                  type="url"
-                  name="profileImage"
-                  value={formData.profileImage}
-                  onChange={handleChange}
-                  placeholder="Profile image URL"
-                  className="input mt-3 text-sm"
-                />
+                <label className="mt-3 cursor-pointer block">
+                  <div className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2 text-sm">
+                    <Upload className="h-4 w-4" />
+                    <span>Change Photo</span>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                  <p className="text-xs text-gray-500 mt-1 text-center">Max 5MB</p>
+                </label>
               )}
             </div>
 

@@ -1,16 +1,29 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../middleware/auth.middleware';
+import { uploadToCloudinary } from '../config/cloudinary';
 
 const prisma = new PrismaClient();
 
 export const updateProfile = async (req: AuthRequest, res: Response) => {
   try {
-    const { fullName, phone, bio, profileImage } = req.body;
+    const { fullName, phone, bio } = req.body;
+    const file = req.file;
+
+    // Upload profile image if provided
+    let profileImageUrl = undefined;
+    if (file) {
+      profileImageUrl = await uploadToCloudinary(file.buffer, 'podzspace/profiles');
+    }
+
+    const updateData: any = { fullName, phone, bio };
+    if (profileImageUrl) {
+      updateData.profileImage = profileImageUrl;
+    }
 
     const user = await prisma.user.update({
       where: { id: req.userId },
-      data: { fullName, phone, bio, profileImage },
+      data: updateData,
       select: {
         id: true,
         email: true,
