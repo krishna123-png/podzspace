@@ -135,7 +135,7 @@ const CreatorDashboard = () => {
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-96 overflow-y-auto">
               {bookings.map((booking) => (
                 <div
                   key={booking.id}
