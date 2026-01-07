@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { useAuthStore } from './store/authStore'
 
 // Layout
@@ -38,6 +39,16 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
 }
 
 function App() {
+  const { checkAuth, isAuthenticated } = useAuthStore()
+
+  // Initialize auth on app mount
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('App: Initializing auth check on mount')
+      checkAuth()
+    }
+  }, [])
+
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
