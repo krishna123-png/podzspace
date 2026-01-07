@@ -94,18 +94,26 @@ const FavoritesPage = () => {
         </div>
 
         {favorites.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <Heart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">No favorites yet</h2>
-            <p className="text-gray-600 mb-6">
-              Start exploring studios and save your favorites for quick access
-            </p>
-            <button
-              onClick={() => navigate('/search')}
-              className="btn-primary"
-            >
-              Browse Studios
-            </button>
+          <div className="bg-white rounded-xl shadow-md p-16 text-center">
+            <div className="max-w-md mx-auto">
+              <div className="mb-6 relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-24 h-24 bg-red-50 rounded-full animate-pulse"></div>
+                </div>
+                <Heart className="h-20 w-20 text-red-400 mx-auto relative z-10" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-3">No favorites yet</h2>
+              <p className="text-lg text-gray-600 mb-8">
+                Start exploring amazing studios and save your favorites for quick access later
+              </p>
+              <button
+                onClick={() => navigate('/search')}
+                className="btn btn-primary text-lg px-8 py-4 hover-lift inline-flex items-center space-x-2 shadow-lg"
+              >
+                <Heart className="h-5 w-5" />
+                <span>Browse Studios</span>
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
