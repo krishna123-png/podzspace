@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { studiosAPI, bookingsAPI } from '@/lib/api'
-import { Plus, Edit2, DollarSign, Calendar, TrendingUp, Star, Eye, Clock, MapPin, ArrowRight } from 'lucide-react'
+import { Plus, Edit2, DollarSign, Calendar, TrendingUp, Eye, Clock, MapPin, ArrowRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const OwnerDashboard = () => {
