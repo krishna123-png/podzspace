@@ -32,7 +32,7 @@ const CreatorDashboard = () => {
       const bookingsData = bookingsRes.data.bookings || []
       const favoritesData = favoritesRes.data.favorites || []
 
-      setBookings(bookingsData.slice(0, 3)) // Latest 3
+      setBookings(bookingsData) // Show all bookings
       setFavorites(favoritesData.slice(0, 3)) // Top 3
 
       // Calculate stats
