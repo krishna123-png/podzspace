@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { studiosAPI, bookingsAPI } from '@/lib/api'
-import { Plus, Edit2, DollarSign, Calendar, TrendingUp, Eye, Clock, MapPin, ArrowRight } from 'lucide-react'
+import { Plus, Edit2, DollarSign, Calendar, Eye, Clock, MapPin, ArrowRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const OwnerDashboard = () => {
@@ -13,9 +13,7 @@ const OwnerDashboard = () => {
   const [recentBookings, setRecentBookings] = useState<any[]>([])
   const [stats, setStats] = useState({
     totalStudios: 0,
-    totalRevenue: 0,
-    pendingBookings: 0,
-    completedBookings: 0
+    totalRevenue: 0
   })
   const [loading, setLoading] = useState(true)
 
@@ -38,17 +36,12 @@ const OwnerDashboard = () => {
       setRecentBookings(bookingsData.slice(0, 5))
 
       // Calculate stats
-      const pending = bookingsData.filter((b: any) => b.status === 'PENDING').length
-      const completed = bookingsData.filter((b: any) => b.status === 'COMPLETED').length
       const totalRevenue = bookingsData
-        .filter((b: any) => b.status === 'COMPLETED')
-        .reduce((sum: number, b: any) => sum + b.totalAmount, 0)
+        .reduce((sum: number, b: any) => sum + (b.hours * b.studio.pricePerHour), 0)
 
       setStats({
         totalStudios: studiosData.length,
-        totalRevenue,
-        pendingBookings: pending,
-        completedBookings: completed
+        totalRevenue
       })
     } catch (error) {
       console.error('Failed to load dashboard:', error)
@@ -98,7 +91,7 @@ const OwnerDashboard = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <MapPin className="h-8 w-8 opacity-80" />
@@ -119,28 +112,6 @@ const OwnerDashboard = () => {
           </div>
           <div className="text-3xl font-bold mb-1">${stats.totalRevenue.toFixed(0)}</div>
           <div className="text-green-100">Total Earned</div>
-        </div>
-
-        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-6 text-white shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <Clock className="h-8 w-8 opacity-80" />
-            <div className="bg-white bg-opacity-20 rounded-full px-3 py-1 text-sm">
-              Pending
-            </div>
-          </div>
-          <div className="text-3xl font-bold mb-1">{stats.pendingBookings}</div>
-          <div className="text-yellow-100">Pending Requests</div>
-        </div>
-
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <TrendingUp className="h-8 w-8 opacity-80" />
-            <div className="bg-white bg-opacity-20 rounded-full px-3 py-1 text-sm">
-              Done
-            </div>
-          </div>
-          <div className="text-3xl font-bold mb-1">{stats.completedBookings}</div>
-          <div className="text-purple-100">Completed Sessions</div>
         </div>
       </div>
 
@@ -191,14 +162,14 @@ const OwnerDashboard = () => {
                   <div className="flex items-center text-sm text-gray-600 space-x-4">
                     <span className="flex items-center">
                       <Calendar className="h-4 w-4 mr-1" />
-                      {new Date(booking.startDate).toLocaleDateString()}
+                      {booking.startDate ? new Date(booking.startDate).toLocaleDateString() : 'N/A'}
                     </span>
                     <span className="flex items-center">
                       <Clock className="h-4 w-4 mr-1" />
-                      {booking.hours}h
+                      {booking.hours || 0}h
                     </span>
                     <span className="text-primary-600 font-semibold ml-auto">
-                      ${booking.totalAmount}
+                      ${booking.hours && booking.studio?.pricePerHour ? (booking.hours * booking.studio.pricePerHour).toFixed(0) : '0'}
                     </span>
                   </div>
                 </div>

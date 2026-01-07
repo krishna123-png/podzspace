@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { bookingsAPI, favoritesAPI } from '@/lib/api'
-import { Calendar, Heart, Search, TrendingUp, Clock, MapPin, Star, ArrowRight } from 'lucide-react'
+import { Calendar, Heart, Search, DollarSign, Clock, MapPin, Star, ArrowRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const CreatorDashboard = () => {
@@ -13,8 +13,6 @@ const CreatorDashboard = () => {
   const [favorites, setFavorites] = useState<any[]>([])
   const [stats, setStats] = useState({
     totalBookings: 0,
-    upcomingBookings: 0,
-    completedBookings: 0,
     totalSpent: 0
   })
   const [loading, setLoading] = useState(true)
@@ -38,18 +36,11 @@ const CreatorDashboard = () => {
       setFavorites(favoritesData.slice(0, 3)) // Top 3
 
       // Calculate stats
-      const upcoming = bookingsData.filter((b: any) => 
-        ['PENDING', 'CONFIRMED'].includes(b.status) && new Date(b.startDate) > new Date()
-      ).length
-      const completed = bookingsData.filter((b: any) => b.status === 'COMPLETED').length
       const totalSpent = bookingsData
-        .filter((b: any) => b.status === 'COMPLETED')
-        .reduce((sum: number, b: any) => sum + b.totalAmount, 0)
+        .reduce((sum: number, b: any) => sum + (b.hours * b.studio.pricePerHour), 0)
 
       setStats({
         totalBookings: bookingsData.length,
-        upcomingBookings: upcoming,
-        completedBookings: completed,
         totalSpent
       })
     } catch (error) {
@@ -91,7 +82,7 @@ const CreatorDashboard = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <Calendar className="h-8 w-8 opacity-80" />
@@ -105,35 +96,13 @@ const CreatorDashboard = () => {
 
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
           <div className="flex items-center justify-between mb-4">
-            <TrendingUp className="h-8 w-8 opacity-80" />
-            <div className="bg-white bg-opacity-20 rounded-full px-3 py-1 text-sm">
-              Active
-            </div>
-          </div>
-          <div className="text-3xl font-bold mb-1">{stats.upcomingBookings}</div>
-          <div className="text-green-100">Upcoming Sessions</div>
-        </div>
-
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <Clock className="h-8 w-8 opacity-80" />
-            <div className="bg-white bg-opacity-20 rounded-full px-3 py-1 text-sm">
-              Done
-            </div>
-          </div>
-          <div className="text-3xl font-bold mb-1">{stats.completedBookings}</div>
-          <div className="text-purple-100">Completed</div>
-        </div>
-
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <TrendingUp className="h-8 w-8 opacity-80" />
+            <DollarSign className="h-8 w-8 opacity-80" />
             <div className="bg-white bg-opacity-20 rounded-full px-3 py-1 text-sm">
               Total
             </div>
           </div>
           <div className="text-3xl font-bold mb-1">${stats.totalSpent.toFixed(0)}</div>
-          <div className="text-orange-100">Total Spent</div>
+          <div className="text-green-100">Total Spent</div>
         </div>
       </div>
 
@@ -182,15 +151,15 @@ const CreatorDashboard = () => {
                   <div className="flex items-center text-sm text-gray-600 space-x-4">
                     <span className="flex items-center">
                       <Calendar className="h-4 w-4 mr-1" />
-                      {new Date(booking.startDate).toLocaleDateString()}
+                      {booking.startDate ? new Date(booking.startDate).toLocaleDateString() : 'N/A'}
                     </span>
                     <span className="flex items-center">
                       <Clock className="h-4 w-4 mr-1" />
-                      {booking.hours}h
+                      {booking.hours || 0}h
                     </span>
                   </div>
                   <div className="mt-2 text-primary-600 font-semibold">
-                    ${booking.totalAmount}
+                    ${booking.hours && booking.studio?.pricePerHour ? (booking.hours * booking.studio.pricePerHour).toFixed(0) : '0'}
                   </div>
                 </div>
               ))}
