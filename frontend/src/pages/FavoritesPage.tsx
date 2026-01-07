@@ -110,7 +110,7 @@ const FavoritesPage = () => {
                 onClick={() => navigate('/search')}
                 className="btn btn-primary text-lg px-8 py-4 hover-lift inline-flex items-center space-x-2 shadow-lg"
               >
-                <Heart className="h-5 w-5" />
+                {/* <Heart className="h-5 w-5" /> */}
                 <span>Browse Studios</span>
               </button>
             </div>
