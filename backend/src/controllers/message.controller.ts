@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 // Send a message
 export const sendMessage = async (req: AuthRequest, res: Response) => {
   try {
-    const senderId = req.user?.id;
+    const senderId = req.userId;
     const { receiverId, studioId, content } = req.body;
 
     if (!senderId) {
@@ -24,24 +24,24 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
       data: {
         senderId,
         receiverId,
-        studioId,
+        studioId: studioId || null,
         content: content.trim(),
       },
       include: {
         sender: {
           select: {
             id: true,
-            name: true,
+            fullName: true,
             email: true,
-            profilePicture: true,
+            profileImage: true,
           },
         },
         receiver: {
           select: {
             id: true,
-            name: true,
+            fullName: true,
             email: true,
-            profilePicture: true,
+            profileImage: true,
           },
         },
         studio: {
@@ -69,7 +69,7 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
 // Get all conversations for a user
 export const getConversations = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.userId;
 
     if (!userId) {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -84,17 +84,17 @@ export const getConversations = async (req: AuthRequest, res: Response) => {
         sender: {
           select: {
             id: true,
-            name: true,
+            fullName: true,
             email: true,
-            profilePicture: true,
+            profileImage: true,
           },
         },
         receiver: {
           select: {
             id: true,
-            name: true,
+            fullName: true,
             email: true,
-            profilePicture: true,
+            profileImage: true,
           },
         },
         studio: {
@@ -117,9 +117,10 @@ export const getConversations = async (req: AuthRequest, res: Response) => {
       const conversationKey = `${otherUserId}-${message.studioId || 'general'}`;
 
       if (!conversationsMap.has(conversationKey)) {
+        const otherUser = message.senderId === userId ? message.receiver : message.sender;
         conversationsMap.set(conversationKey, {
-          otherUser: message.senderId === userId ? message.receiver : message.sender,
-          studio: message.studio,
+          otherUser: otherUser,
+          studio: message.studio || null,
           lastMessage: message,
           unreadCount: 0,
         });
@@ -128,7 +129,9 @@ export const getConversations = async (req: AuthRequest, res: Response) => {
       // Count unread messages (messages sent to current user that are unread)
       if (message.receiverId === userId && !message.isRead) {
         const conversation = conversationsMap.get(conversationKey);
-        conversation.unreadCount += 1;
+        if (conversation) {
+          conversation.unreadCount += 1;
+        }
       }
     });
 
@@ -147,7 +150,7 @@ export const getConversations = async (req: AuthRequest, res: Response) => {
 // Get messages for a specific conversation
 export const getMessages = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.userId;
     const { conversationId } = req.params; // Format: "otherUserId-studioId"
 
     if (!userId) {
@@ -167,7 +170,7 @@ export const getMessages = async (req: AuthRequest, res: Response) => {
               { senderId: otherUserId, receiverId: userId },
             ],
           },
-          { studioId: studioId || null },
+          { studioId: studioId },
         ],
       },
       include: {
@@ -212,7 +215,7 @@ export const getMessages = async (req: AuthRequest, res: Response) => {
 // Mark a message as read
 export const markAsRead = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.userId;
     const { messageId } = req.params;
 
     if (!userId) {
