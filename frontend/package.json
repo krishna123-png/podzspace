@@ -10,19 +10,22 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.20.1",
     "axios": "^1.6.2",
-    "zustand": "^4.4.7",
-    "react-hook-form": "^7.49.2",
-    "date-fns": "^3.0.0",
-    "react-calendar": "^4.7.0",
-    "lucide-react": "^0.294.0",
     "clsx": "^2.0.0",
+    "date-fns": "^3.6.0",
     "framer-motion": "^10.16.16",
+    "lucide-react": "^0.294.0",
+    "react": "^18.2.0",
+    "react-calendar": "^4.8.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.49.2",
     "react-hot-toast": "^2.4.1",
-    "swiper": "^11.0.5"
+    "react-razorpay": "^3.0.1",
+    "react-router-dom": "^6.20.1",
+    "recharts": "^3.6.0",
+    "socket.io-client": "^4.8.3",
+    "swiper": "^11.0.5",
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

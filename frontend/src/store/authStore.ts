@@ -11,6 +11,12 @@ interface User {
   profileImage?: string
   bio?: string
   createdAt: string
+  accountHolderName?: string
+  accountNumber?: string
+  ifscCode?: string
+  bankName?: string
+  upiId?: string
+  razorpayAccountId?: string
 }
 
 interface AuthState {

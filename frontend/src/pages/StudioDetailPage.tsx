@@ -1,10 +1,16 @@
 // Placeholder - Studio detail with booking
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { studiosAPI, bookingsAPI } from '@/lib/api'
+import { studiosAPI, bookingsAPI, paymentsAPI } from '@/lib/api'
 import { MapPin, Star, X, CreditCard } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuthStore } from '@/store/authStore'
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 const StudioDetailPage = () => {
   const { id } = useParams()
@@ -72,22 +78,75 @@ const StudioDetailPage = () => {
     try {
       const totalAmount = studio.pricePerHour * bookingData.hours
 
-      await bookingsAPI.create({
+      // First create the booking
+      const bookingResponse = await bookingsAPI.create({
         studioId: id,
         bookingDate: bookingData.date,
         startTime: bookingData.startTime,
         endTime: bookingData.endTime,
         totalHours: bookingData.hours,
-        paymentMethod,
+        paymentMethod: 'CARD',
         paymentAmount: totalAmount,
       })
-      
-      toast.success('Booking confirmed! Payment successful.')
-      setShowPaymentModal(false)
-      navigate('/my-bookings')
+
+      const bookingId = bookingResponse.data.booking.id
+
+      // Create Razorpay order
+      const orderResponse = await paymentsAPI.createOrder({
+        bookingId,
+        amount: totalAmount,
+      })
+
+      // Load Razorpay script if not already loaded
+      if (!window.Razorpay) {
+        const script = document.createElement('script')
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+        script.async = true
+        document.body.appendChild(script)
+        await new Promise((resolve) => {
+          script.onload = resolve
+        })
+      }
+
+      // Initialize Razorpay
+      const options = {
+        key: orderResponse.data.keyId,
+        amount: orderResponse.data.amount,
+        currency: orderResponse.data.currency,
+        name: 'PodzSpace',
+        description: `Booking for ${studio.name}`,
+        order_id: orderResponse.data.orderId,
+        handler: async function (response: any) {
+          try {
+            // Verify payment
+            await paymentsAPI.verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              bookingId,
+            })
+            
+            toast.success('Booking confirmed! Payment successful.')
+            setShowPaymentModal(false)
+            navigate('/my-bookings')
+          } catch (error) {
+            toast.error('Payment verification failed')
+          }
+        },
+        prefill: {
+          name: useAuthStore.getState().user?.fullName || '',
+          email: useAuthStore.getState().user?.email || '',
+        },
+        theme: {
+          color: '#8B5CF6',
+        },
+      }
+
+      const rzp = new window.Razorpay(options)
+      rzp.open()
+      setLoading(false)
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Booking failed')
-    } finally {
       setLoading(false)
     }
   }

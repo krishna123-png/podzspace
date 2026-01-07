@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { studiosAPI } from '@/lib/api'
+import { studiosAPI, uploadAPI } from '@/lib/api'
 import { Upload, Plus, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -86,17 +86,24 @@ const AddStudioPage = () => {
     setLoading(true)
 
     try {
-      // For now, we'll use placeholder URLs since we don't have actual file upload
-      // In production, you would upload files to Cloudinary/S3 first
-      const imageUrls = imagePreviews.length > 0 
-        ? imagePreviews 
-        : ['https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800']
+      let imageUrls: string[] = []
+
+      // Upload images to Cloudinary if files exist
+      if (imageFiles.length > 0) {
+        toast.loading('Uploading images...')
+        const uploadResponse = await uploadAPI.multiple(imageFiles)
+        imageUrls = uploadResponse.data.imageUrls
+        toast.dismiss()
+        toast.success('Images uploaded!')
+      }
 
       const studioData = {
         ...formData,
         pricePerHour: parseFloat(formData.pricePerHour),
         capacity: parseInt(formData.capacity),
-        images: imageUrls,
+        images: imageUrls.length > 0 
+          ? imageUrls 
+          : ['https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800'],
         amenities: amenities.filter(amenity => amenity.trim() !== ''),
         equipment: equipment.filter(equip => equip.trim() !== ''),
       }

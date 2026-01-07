@@ -81,3 +81,29 @@ export const usersAPI = {
   getProfile: (id: string) => api.get(`/users/profile/${id}`),
   getStats: () => api.get('/users/stats'),
 }
+
+// Payments API
+export const paymentsAPI = {
+  createOrder: (data: any) => api.post('/payments/create-order', data),
+  verifyPayment: (data: any) => api.post('/payments/verify', data),
+  getPaymentDetails: (paymentId: string) => api.get(`/payments/${paymentId}`),
+  setupBankAccount: (data: any) => api.post('/payments/setup-bank', data),
+}
+
+// Upload API
+export const uploadAPI = {
+  single: (file: File) => {
+    const formData = new FormData()
+    formData.append('image', file)
+    return api.post('/upload/single', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+  multiple: (files: File[]) => {
+    const formData = new FormData()
+    files.forEach(file => formData.append('images', file))
+    return api.post('/upload/multiple', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+}

@@ -16,6 +16,10 @@ import MyBookingsPage from './pages/MyBookingsPage'
 import ProfilePage from './pages/ProfilePage'
 import AddStudioPage from './pages/AddStudioPage'
 import EditStudioPage from './pages/EditStudioPage'
+import BankAccountSetupPage from './pages/BankAccountSetupPage'
+import StudioCalendarPage from './pages/StudioCalendarPage'
+import AnalyticsDashboardPage from './pages/AnalyticsDashboardPage'
+import MessagesPage from './pages/MessagesPage'
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) => {
@@ -80,6 +84,38 @@ function App() {
           element={
             <ProtectedRoute requiredRole="STUDIO_OWNER">
               <EditStudioPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="bank-setup"
+          element={
+            <ProtectedRoute requiredRole="STUDIO_OWNER">
+              <BankAccountSetupPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="studio-calendar/:studioId"
+          element={
+            <ProtectedRoute requiredRole="STUDIO_OWNER">
+              <StudioCalendarPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="analytics"
+          element={
+            <ProtectedRoute requiredRole="STUDIO_OWNER">
+              <AnalyticsDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="messages"
+          element={
+            <ProtectedRoute>
+              <MessagesPage />
             </ProtectedRoute>
           }
         />
