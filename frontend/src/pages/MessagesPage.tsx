@@ -16,15 +16,15 @@ interface Message {
   createdAt: string;
   sender: {
     id: string;
-    name: string;
+    fullName: string;
     email: string;
-    profilePicture?: string;
+    profileImage?: string;
   };
   receiver: {
     id: string;
-    name: string;
+    fullName: string;
     email: string;
-    profilePicture?: string;
+    profileImage?: string;
   };
   studio?: {
     id: string;
@@ -35,9 +35,9 @@ interface Message {
 interface Conversation {
   otherUser: {
     id: string;
-    name: string;
+    fullName: string;
     email: string;
-    profilePicture?: string;
+    profileImage?: string;
   };
   studio?: {
     id: string;
@@ -212,16 +212,16 @@ const MessagesPage: React.FC = () => {
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-3 flex-1">
                         <div className="flex-shrink-0">
-                          {conversation.otherUser.profilePicture ? (
+                          {conversation.otherUser.profileImage ? (
                             <img
-                              src={conversation.otherUser.profilePicture}
-                              alt={conversation.otherUser.name}
+                              src={conversation.otherUser.profileImage}
+                              alt={conversation.otherUser.fullName}
                               className="w-12 h-12 rounded-full object-cover"
                             />
                           ) : (
                             <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
                               <span className="text-indigo-600 font-semibold text-lg">
-                                {conversation.otherUser.name.charAt(0).toUpperCase()}
+                                {conversation.otherUser.fullName.charAt(0).toUpperCase()}
                               </span>
                             </div>
                           )}
@@ -229,7 +229,7 @@ const MessagesPage: React.FC = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <p className="text-sm font-semibold text-gray-900 truncate">
-                              {conversation.otherUser.name}
+                              {conversation.otherUser.fullName}
                             </p>
                             {conversation.unreadCount > 0 && (
                               <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-indigo-600 rounded-full">
@@ -263,22 +263,22 @@ const MessagesPage: React.FC = () => {
                   {/* Chat Header */}
                   <div className="p-4 border-b border-gray-200 bg-white">
                     <div className="flex items-center space-x-3">
-                      {selectedConversation.otherUser.profilePicture ? (
+                      {selectedConversation.otherUser.profileImage ? (
                         <img
-                          src={selectedConversation.otherUser.profilePicture}
-                          alt={selectedConversation.otherUser.name}
+                          src={selectedConversation.otherUser.profileImage}
+                          alt={selectedConversation.otherUser.fullName}
                           className="w-10 h-10 rounded-full object-cover"
                         />
                       ) : (
                         <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
                           <span className="text-indigo-600 font-semibold">
-                            {selectedConversation.otherUser.name.charAt(0).toUpperCase()}
+                            {selectedConversation.otherUser.fullName.charAt(0).toUpperCase()}
                           </span>
                         </div>
                       )}
                       <div>
                         <h3 className="font-semibold text-gray-900">
-                          {selectedConversation.otherUser.name}
+                          {selectedConversation.otherUser.fullName}
                         </h3>
                         {selectedConversation.studio && (
                           <p className="text-sm text-gray-500">
