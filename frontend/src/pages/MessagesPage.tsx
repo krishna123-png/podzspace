@@ -177,7 +177,17 @@ const MessagesPage: React.FC = () => {
   useEffect(() => {
     if (selectedConversation) {
       const conversationId = `${selectedConversation.otherUser.id}-${selectedConversation.studio?.id || 'general'}`;
+      console.log('Selected conversation:', {
+        otherUserId: selectedConversation.otherUser.id,
+        otherUserName: selectedConversation.otherUser.fullName,
+        studioId: selectedConversation.studio?.id,
+        studioName: selectedConversation.studio?.name,
+        conversationId: conversationId
+      });
       fetchMessages(conversationId);
+    } else {
+      console.log('No conversation selected, clearing messages');
+      setMessages([]);
     }
   }, [selectedConversation]);
 
