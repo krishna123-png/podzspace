@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
-import { Mail, Lock, User, Phone, Eye, EyeOff, Mic2, Building } from 'lucide-react'
+import { Mail, Lock, User, Phone, Eye, EyeOff, Mic2, Building, Upload } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const RegisterPage = () => {
@@ -12,9 +12,27 @@ const RegisterPage = () => {
     phone: '',
     role: 'CREATOR' as 'CREATOR' | 'STUDIO_OWNER',
   })
+  const [profileImage, setProfileImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string>('')
   const [showPassword, setShowPassword] = useState(false)
   const { register, isLoading } = useAuthStore()
   const navigate = useNavigate()
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB')
+        return
+      }
+      setProfileImage(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,7 +48,19 @@ const RegisterPage = () => {
     }
 
     try {
-      await register(formData)
+      const formDataToSend = new FormData()
+      formDataToSend.append('fullName', formData.fullName)
+      formDataToSend.append('email', formData.email)
+      formDataToSend.append('password', formData.password)
+      formDataToSend.append('role', formData.role)
+      if (formData.phone) {
+        formDataToSend.append('phone', formData.phone)
+      }
+      if (profileImage) {
+        formDataToSend.append('profileImage', profileImage)
+      }
+
+      await register(formDataToSend)
       navigate('/dashboard')
     } catch (error: any) {
       console.error('Registration error:', error)
@@ -83,6 +113,39 @@ const RegisterPage = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Profile Image */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Profile Photo
+              </label>
+              <div className="flex items-center space-x-4">
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Profile preview"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center border-2 border-gray-200">
+                    <User className="h-10 w-10 text-gray-400" />
+                  </div>
+                )}
+                <label className="cursor-pointer">
+                  <div className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2">
+                    <Upload className="h-4 w-4" />
+                    <span className="text-sm">Choose Photo</span>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">JPG, PNG or WebP. Max 5MB.</p>
+            </div>
+
             {/* Full Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

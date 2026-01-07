@@ -25,7 +25,7 @@ interface AuthState {
   isAuthenticated: boolean
   isLoading: boolean
   login: (email: string, password: string) => Promise<void>
-  register: (data: any) => Promise<void>
+  register: (data: any | FormData) => Promise<void>
   logout: () => void
   checkAuth: () => Promise<void>
   setUser: (user: User) => void

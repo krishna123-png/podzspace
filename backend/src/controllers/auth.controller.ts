@@ -3,12 +3,14 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { AuthRequest } from '../middleware/auth.middleware';
+import { uploadToCloudinary } from '../config/cloudinary';
 
 const prisma = new PrismaClient();
 
 export const register = async (req: Request, res: Response) => {
   try {
     const { email, password, fullName, role, phone } = req.body;
+    const file = req.file;
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -19,6 +21,12 @@ export const register = async (req: Request, res: Response) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Upload profile image if provided
+    let profileImageUrl = null;
+    if (file) {
+      profileImageUrl = await uploadToCloudinary(file.buffer, 'podzspace/profiles');
+    }
+
     // Create user
     const user = await prisma.user.create({
       data: {
@@ -27,6 +35,7 @@ export const register = async (req: Request, res: Response) => {
         fullName,
         role,
         phone,
+        profileImage: profileImageUrl,
       },
     });
 

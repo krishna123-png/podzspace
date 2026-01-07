@@ -50,9 +50,17 @@ const Navbar = () => {
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                   className="flex items-center space-x-2 text-gray-700 hover:text-primary-600 transition"
                 >
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-semibold">
-                    {user?.fullName.charAt(0).toUpperCase()}
-                  </div>
+                  {user?.profileImage ? (
+                    <img
+                      src={user.profileImage}
+                      alt={user.fullName}
+                      className="h-10 w-10 rounded-full object-cover border-2 border-gray-200"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-semibold">
+                      {user?.fullName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <span className="font-medium">{user?.fullName.split(' ')[0]}</span>
                 </button>
 
