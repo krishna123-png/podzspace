@@ -163,18 +163,16 @@ export const getMessages = async (req: AuthRequest, res: Response) => {
     const [otherUserId, studioIdentifier] = conversationId.split('-');
     const studioId = studioIdentifier === 'general' ? null : studioIdentifier;
 
+    console.log(`Fetching messages: userId=${userId}, otherUserId=${otherUserId}, studioId=${studioId}`);
+
     // Fetch messages between the two users for the specific studio
     const messages = await prisma.message.findMany({
       where: {
-        AND: [
-          {
-            OR: [
-              { senderId: userId, receiverId: otherUserId },
-              { senderId: otherUserId, receiverId: userId },
-            ],
-          },
-          { studioId: studioId },
+        OR: [
+          { senderId: userId, receiverId: otherUserId },
+          { senderId: otherUserId, receiverId: userId },
         ],
+        studioId: studioId,
       },
       include: {
         sender: {
