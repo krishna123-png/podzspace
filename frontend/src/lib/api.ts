@@ -72,6 +72,7 @@ export const studiosAPI = {
 export const bookingsAPI = {
   create: (data: any) => api.post('/bookings', data),
   getMyBookings: () => api.get('/bookings/my-bookings'),
+  getBookingsForMyStudios: () => api.get('/bookings/my-studios-bookings'),
   getStudioBookings: (studioId: string) => api.get(`/bookings/studio/${studioId}`),
   updateStatus: (id: string, status: string) => api.patch(`/bookings/${id}/status`, { status }),
   cancel: (id: string) => api.patch(`/bookings/${id}/cancel`),

@@ -273,3 +273,40 @@ export const cancelBooking = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+// Get all bookings for the owner's studios
+export const getBookingsForMyStudios = async (req: AuthRequest, res: Response) => {
+  try {
+    // First get all studios owned by this user
+    const studios = await prisma.studio.findMany({
+      where: { ownerId: req.userId! },
+      select: { id: true },
+    });
+
+    const studioIds = studios.map(s => s.id);
+
+    // Get all bookings for these studios
+    const bookings = await prisma.booking.findMany({
+      where: {
+        studioId: { in: studioIds },
+      },
+      include: {
+        studio: true,
+        creator: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            profileImage: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    res.json({ bookings });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
