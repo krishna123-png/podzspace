@@ -149,12 +149,12 @@ const AnalyticsDashboardPage = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={(entry) => entry.status}
+                  label={(entry: any) => entry.status}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="count"
                 >
-                  {analytics.statusDistribution.map((entry: any, index: number) => (
+                  {analytics.statusDistribution.map((_: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
