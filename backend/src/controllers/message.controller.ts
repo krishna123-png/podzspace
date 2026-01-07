@@ -138,13 +138,15 @@ export const getConversations = async (req: AuthRequest, res: Response) => {
 
     const conversations = Array.from(conversationsMap.values());
 
+    console.log(`Fetched ${conversations.length} conversations for user ${userId}`);
+
     res.json({
       message: 'Conversations fetched successfully',
       data: conversations,
     });
   } catch (error) {
     console.error('Error fetching conversations:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error', error: String(error) });
   }
 };
 
@@ -203,13 +205,15 @@ export const getMessages = async (req: AuthRequest, res: Response) => {
       },
     });
 
+    console.log(`Fetched ${messages.length} messages for conversation ${conversationId}`);
+
     res.json({
       message: 'Messages fetched successfully',
       data: messages,
     });
   } catch (error) {
     console.error('Error fetching messages:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error', error: String(error) });
   }
 };
 

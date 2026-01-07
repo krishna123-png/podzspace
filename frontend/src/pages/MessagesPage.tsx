@@ -12,7 +12,7 @@ interface Message {
   senderId: string;
   receiverId: string;
   studioId?: string;
-  read: boolean;
+  isRead: boolean;
   createdAt: string;
   sender: {
     id: string;
@@ -86,8 +86,12 @@ const MessagesPage: React.FC = () => {
         }
       }
 
-      // Refresh conversations list
-      fetchConversations();
+      // Refresh conversations list only if needed
+      if (!selectedConversation || 
+          (message.senderId !== selectedConversation.otherUser.id && 
+           message.receiverId !== selectedConversation.otherUser.id)) {
+        fetchConversations();
+      }
     });
 
     return () => {
@@ -106,10 +110,11 @@ const MessagesPage: React.FC = () => {
   const fetchConversations = async () => {
     try {
       const response = await api.get('/messages/conversations');
-      setConversations(response.data.data);
+      setConversations(response.data.data || []);
     } catch (error) {
       console.error('Failed to fetch conversations:', error);
       toast.error('Failed to load conversations');
+      setConversations([]);
     } finally {
       setLoading(false);
     }
@@ -118,11 +123,11 @@ const MessagesPage: React.FC = () => {
   const fetchMessages = async (conversationId: string) => {
     try {
       const response = await api.get(`/messages/${conversationId}`);
-      setMessages(response.data.data);
+      setMessages(response.data.data || []);
 
       // Mark all unread messages as read
-      const unreadMessages = response.data.data.filter(
-        (msg: Message) => msg.receiverId === user?.id && !msg.read
+      const unreadMessages = (response.data.data || []).filter(
+        (msg: Message) => msg.receiverId === user?.id && !msg.isRead
       );
       for (const msg of unreadMessages) {
         api.patch(`/messages/${msg.id}/read`).catch(console.error);
@@ -130,6 +135,7 @@ const MessagesPage: React.FC = () => {
     } catch (error) {
       console.error('Failed to fetch messages:', error);
       toast.error('Failed to load messages');
+      setMessages([]);
     }
   };
 
@@ -158,9 +164,17 @@ const MessagesPage: React.FC = () => {
         content: messageInput.trim(),
       });
 
-      setMessages((prev) => [...prev, response.data.data]);
+      // Message will be added via socket, but add it optimistically
+      const newMessage = response.data.data;
+      setMessages((prev) => {
+        // Check if message already exists (from socket)
+        if (prev.some(m => m.id === newMessage.id)) {
+          return prev;
+        }
+        return [...prev, newMessage];
+      });
       setMessageInput('');
-      fetchConversations();
+      scrollToBottom();
     } catch (error) {
       console.error('Failed to send message:', error);
       toast.error('Failed to send message');
