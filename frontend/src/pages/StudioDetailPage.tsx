@@ -5,6 +5,7 @@ import { studiosAPI, bookingsAPI, paymentsAPI, favoritesAPI } from '@/lib/api'
 import { MapPin, Star, X, CreditCard, Heart, MessageCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuthStore } from '@/store/authStore'
+import ChatBox from '@/components/ChatBox'
 
 declare global {
   interface Window {
@@ -24,6 +25,7 @@ const StudioDetailPage = () => {
   const [upiId, setUpiId] = useState('')
   const [loading, setLoading] = useState(false)
   const [isFavorited, setIsFavorited] = useState(false)
+  const [showChatBox, setShowChatBox] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -72,6 +74,15 @@ const StudioDetailPage = () => {
     } catch (error) {
       toast.error('Failed to update favorites')
     }
+  }
+
+  const handleContactOwner = () => {
+    if (!isAuthenticated) {
+      toast.error('Please login to message the owner')
+      navigate('/login')
+      return
+    }
+    setShowChatBox(true)
   }
 
   const handleBooking = async () => {
@@ -248,7 +259,7 @@ const StudioDetailPage = () => {
               <input type="time" value={bookingData.endTime} onChange={(e) => setBookingData({...bookingData, endTime: e.target.value})} className="input" />
               <button onClick={handleBooking} className="btn btn-primary w-full">Book Now</button>
               <button 
-                onClick={() => navigate('/messages')} 
+                onClick={handleContactOwner} 
                 className="btn btn-secondary w-full flex items-center justify-center space-x-2"
               >
                 <MessageCircle className="h-5 w-5" />
@@ -259,6 +270,18 @@ const StudioDetailPage = () => {
         </div>
       </div>
       </div>
+
+      {/* Chat Box */}
+      {showChatBox && studio && (
+        <ChatBox
+          isOpen={showChatBox}
+          onClose={() => setShowChatBox(false)}
+          receiverId={studio.owner.id}
+          receiverName={studio.owner.fullName}
+          studioId={studio.id}
+          studioName={studio.name}
+        />
+      )}
 
       {/* Payment Modal */}
       {showPaymentModal && (
