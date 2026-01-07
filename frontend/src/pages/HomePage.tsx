@@ -1,15 +1,32 @@
 import { Link } from 'react-router-dom'
-import { Search, Mic2, Calendar, Star, Shield, Headphones, MapPin, DollarSign, CheckCircle, ArrowRight } from 'lucide-react'
+import { Search, Mic2, Calendar, Star, Shield, Headphones, MapPin, DollarSign, CheckCircle, ArrowRight, Heart } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import { studiosAPI } from '@/lib/api'
+import { studiosAPI, favoritesAPI } from '@/lib/api'
+import { useAuthStore } from '@/store/authStore'
+import toast from 'react-hot-toast'
 
 const HomePage = () => {
+  const { isAuthenticated } = useAuthStore()
   const [featuredStudios, setFeaturedStudios] = useState<any[]>([])
+  const [favorites, setFavorites] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     loadFeaturedStudios()
-  }, [])
+    if (isAuthenticated) {
+      loadFavorites()
+    }
+  }, [isAuthenticated])
+
+  const loadFavorites = async () => {
+    try {
+      const response = await favoritesAPI.getAll()
+      const favoriteIds = new Set(response.data.favorites.map((f: any) => f.studioId))
+      setFavorites(favoriteIds)
+    } catch (error) {
+      console.error('Failed to load favorites:', error)
+    }
+  }
 
   const loadFeaturedStudios = async () => {
     try {
@@ -20,6 +37,62 @@ const HomePage = () => {
     }
   }
 
+  const toggleFavorite = async (e: React.MouseEvent, studioId: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!isAuthenticated) {
+      toast.error('Please login to add favorites')
+      return
+    }
+
+    try {
+      const isFavorited = favorites.has(studioId)
+      if (isFavorited) {
+        await favoritesAPI.remove(studioId)
+        setFavorites(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(studioId)
+          return newSet
+        })
+        toast.success('Removed from favorites')
+      } else {
+        await favoritesAPI.add(studioId)
+        setFavorites(prev => new Set(prev).add(studioId))
+        toast.success('Added to favorites')
+      }
+    } catch (error) {
+      toast.error('Failed to update favorites')
+    }
+  }
+  const toggleFavorite = async (e: React.MouseEvent, studioId: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (!isAuthenticated) {
+      toast.error('Please login to add favorites')
+      return
+    }
+
+    try {
+      const isFavorited = favorites.has(studioId)
+      if (isFavorited) {
+        await favoritesAPI.remove(studioId)
+        setFavorites(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(studioId)
+          return newSet
+        })
+        toast.success('Removed from favorites')
+      } else {
+        await favoritesAPI.add(studioId)
+        setFavorites(prev => new Set(prev).add(studioId))
+        toast.success('Added to favorites')
+      }
+    } catch (error) {
+      toast.error('Failed to update favorites')
+    }
+  }
   return (
     <div className="bg-white">
       {/* Hero Section */}
@@ -243,6 +316,18 @@ const HomePage = () => {
                       <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />
                       <span className="font-semibold text-sm">{studio.averageRating.toFixed(1)}</span>
                     </div>
+                    <button
+                      onClick={(e) => toggleFavorite(e, studio.id)}
+                      className="absolute top-4 left-4 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
+                    >
+                      <Heart
+                        className={`h-5 w-5 ${
+                          favorites.has(studio.id)
+                            ? 'text-red-500 fill-red-500'
+                            : 'text-gray-600'
+                        }`}
+                      />
+                    </button>
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-2">{studio.name}</h3>
