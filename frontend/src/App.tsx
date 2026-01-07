@@ -20,6 +20,7 @@ import BankAccountSetupPage from './pages/BankAccountSetupPage'
 import StudioCalendarPage from './pages/StudioCalendarPage'
 import AnalyticsDashboardPage from './pages/AnalyticsDashboardPage'
 import MessagesPage from './pages/MessagesPage'
+import FavoritesPage from './pages/FavoritesPage'
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) => {
@@ -116,6 +117,14 @@ function App() {
           element={
             <ProtectedRoute>
               <MessagesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="favorites"
+          element={
+            <ProtectedRoute>
+              <FavoritesPage />
             </ProtectedRoute>
           }
         />

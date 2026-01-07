@@ -107,3 +107,11 @@ export const uploadAPI = {
     })
   },
 }
+
+// Favorites API
+export const favoritesAPI = {
+  add: (studioId: string) => api.post('/favorites', { studioId }),
+  remove: (studioId: string) => api.delete(`/favorites/${studioId}`),
+  getAll: () => api.get('/favorites'),
+  check: (studioId: string) => api.get(`/favorites/check/${studioId}`),
+}
