@@ -44,7 +44,15 @@ api.interceptors.response.use(
 
 // Auth API
 export const authAPI = {
-  register: (data: any) => api.post('/auth/register', data),
+  register: (data: any) => {
+    // Check if data is FormData (for image upload)
+    if (data instanceof FormData) {
+      return api.post('/auth/register', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+    }
+    return api.post('/auth/register', data)
+  },
   login: (data: any) => api.post('/auth/login', data),
   getMe: () => api.get('/auth/me'),
 }
@@ -77,7 +85,15 @@ export const reviewsAPI = {
 
 // Users API
 export const usersAPI = {
-  updateProfile: (data: any) => api.put('/users/profile', data),
+  updateProfile: (data: any) => {
+    // Check if data is FormData (for image upload)
+    if (data instanceof FormData) {
+      return api.put('/users/profile', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+    }
+    return api.put('/users/profile', data)
+  },
   getProfile: (id: string) => api.get(`/users/profile/${id}`),
   getStats: () => api.get('/users/stats'),
 }
