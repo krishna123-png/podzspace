@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Send, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
@@ -51,6 +51,7 @@ const MessagesPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const socket = useSocket();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -93,6 +94,14 @@ const MessagesPage: React.FC = () => {
       socket.off('new-message');
     };
   }, [socket, selectedConversation, user]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const fetchConversations = async () => {
     try {
@@ -317,6 +326,7 @@ const MessagesPage: React.FC = () => {
                         </div>
                       );
                     })}
+                    <div ref={messagesEndRef} />
                   </div>
 
                   {/* Message Input */}

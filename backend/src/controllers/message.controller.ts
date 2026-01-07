@@ -53,8 +53,9 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // Emit real-time event to receiver
+    // Emit real-time event to both sender and receiver
     io.to(`user-${receiverId}`).emit('new-message', message);
+    io.to(`user-${senderId}`).emit('new-message', message);
 
     res.status(201).json({
       message: 'Message sent successfully',
