@@ -23,7 +23,7 @@ const SearchPage = () => {
   const loadFavorites = async () => {
     try {
       const response = await favoritesAPI.getAll()
-      const favoriteIds = new Set(response.data.favorites.map((f: any) => f.studioId))
+      const favoriteIds = new Set<string>(response.data.favorites.map((f: any) => f.studioId))
       setFavorites(favoriteIds)
     } catch (error) {
       console.error('Failed to load favorites:', error)

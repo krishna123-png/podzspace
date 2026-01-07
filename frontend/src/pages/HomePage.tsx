@@ -21,7 +21,7 @@ const HomePage = () => {
   const loadFavorites = async () => {
     try {
       const response = await favoritesAPI.getAll()
-      const favoriteIds = new Set(response.data.favorites.map((f: any) => f.studioId))
+      const favoriteIds = new Set<string>(response.data.favorites.map((f: any) => f.studioId))
       setFavorites(favoriteIds)
     } catch (error) {
       console.error('Failed to load favorites:', error)
@@ -65,34 +65,7 @@ const HomePage = () => {
       toast.error('Failed to update favorites')
     }
   }
-  const toggleFavorite = async (e: React.MouseEvent, studioId: string) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    if (!isAuthenticated) {
-      toast.error('Please login to add favorites')
-      return
-    }
 
-    try {
-      const isFavorited = favorites.has(studioId)
-      if (isFavorited) {
-        await favoritesAPI.remove(studioId)
-        setFavorites(prev => {
-          const newSet = new Set(prev)
-          newSet.delete(studioId)
-          return newSet
-        })
-        toast.success('Removed from favorites')
-      } else {
-        await favoritesAPI.add(studioId)
-        setFavorites(prev => new Set(prev).add(studioId))
-        toast.success('Added to favorites')
-      }
-    } catch (error) {
-      toast.error('Failed to update favorites')
-    }
-  }
   return (
     <div className="bg-white">
       {/* Hero Section */}
