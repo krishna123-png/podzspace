@@ -1,11 +1,12 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { AuthRequest } from '../middleware/auth.middleware';
 import { io } from '../server';
 
 const prisma = new PrismaClient();
 
 // Send a message
-export const sendMessage = async (req: Request, res: Response) => {
+export const sendMessage = async (req: AuthRequest, res: Response) => {
   try {
     const senderId = req.user?.id;
     const { receiverId, studioId, content } = req.body;
@@ -66,7 +67,7 @@ export const sendMessage = async (req: Request, res: Response) => {
 };
 
 // Get all conversations for a user
-export const getConversations = async (req: Request, res: Response) => {
+export const getConversations = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
 
@@ -125,7 +126,7 @@ export const getConversations = async (req: Request, res: Response) => {
       }
 
       // Count unread messages (messages sent to current user that are unread)
-      if (message.receiverId === userId && !message.read) {
+      if (message.receiverId === userId && !message.isRead) {
         const conversation = conversationsMap.get(conversationKey);
         conversation.unreadCount += 1;
       }
@@ -144,7 +145,7 @@ export const getConversations = async (req: Request, res: Response) => {
 };
 
 // Get messages for a specific conversation
-export const getMessages = async (req: Request, res: Response) => {
+export const getMessages = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     const { conversationId } = req.params; // Format: "otherUserId-studioId"
@@ -166,24 +167,24 @@ export const getMessages = async (req: Request, res: Response) => {
               { senderId: otherUserId, receiverId: userId },
             ],
           },
-          studioId ? { studioId } : { studioId: null },
+          { studioId: studioId || null },
         ],
       },
       include: {
         sender: {
           select: {
             id: true,
-            name: true,
+            fullName: true,
             email: true,
-            profilePicture: true,
+            profileImage: true,
           },
         },
         receiver: {
           select: {
             id: true,
-            name: true,
+            fullName: true,
             email: true,
-            profilePicture: true,
+            profileImage: true,
           },
         },
         studio: {
@@ -209,7 +210,7 @@ export const getMessages = async (req: Request, res: Response) => {
 };
 
 // Mark a message as read
-export const markAsRead = async (req: Request, res: Response) => {
+export const markAsRead = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.id;
     const { messageId } = req.params;
@@ -234,7 +235,7 @@ export const markAsRead = async (req: Request, res: Response) => {
     // Update the message
     const updatedMessage = await prisma.message.update({
       where: { id: messageId },
-      data: { read: true },
+      data: { isRead: true },
     });
 
     res.json({

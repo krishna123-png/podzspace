@@ -89,14 +89,10 @@ export const createLinkedAccount = async (userData: {
       },
     });
 
-    // Add bank account to the linked account
-    const bankAccount = await razorpay.accounts.addBankAccount(account.id, {
-      account_number: userData.accountNumber,
-      ifsc_code: userData.ifscCode,
-      beneficiary_name: userData.name,
-    });
+    // Note: Bank account details should be added through Razorpay dashboard
+    // The addBankAccount API method is not available in the current SDK version
 
-    return { account, bankAccount };
+    return { account };
   } catch (error) {
     console.error('Create linked account error:', error);
     throw new Error('Failed to create linked account');

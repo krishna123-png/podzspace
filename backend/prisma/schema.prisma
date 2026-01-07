@@ -97,6 +97,7 @@ model Studio {
   reviews         Review[]
   availability    Availability[]
   favoritedBy     Favorite[]
+  messages        Message[]
 
   @@map("studios")
 }
@@ -223,12 +224,14 @@ model Message {
   content    String
   senderId   String
   receiverId String
+  studioId   String?
   bookingId  String?
   isRead     Boolean  @default(false)
   createdAt  DateTime @default(now())
   
-  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender   User   @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User   @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  studio   Studio? @relation(fields: [studioId], references: [id], onDelete: Cascade)
   
   @@map("messages")
 }
