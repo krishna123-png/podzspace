@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { bookingsAPI } from '@/lib/api'
-import { Calendar, Clock, CheckCircle, XCircle } from 'lucide-react'
+import { Calendar, Clock, CheckCircle } from 'lucide-react'
 import { format, parseISO, isSameDay } from 'date-fns'
 import toast from 'react-hot-toast'
 

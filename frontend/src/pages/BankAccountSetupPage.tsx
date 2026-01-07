@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { paymentsAPI, usersAPI } from '@/lib/api'
-import { CreditCard, Building2, CheckCircle, AlertCircle } from 'lucide-react'
+import { Building2, CheckCircle, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const BankAccountSetupPage = () => {
