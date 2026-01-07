@@ -86,12 +86,16 @@ export const getStudios = async (req: Request, res: Response) => {
 
 export const searchStudios = async (req: Request, res: Response) => {
   try {
-    const { city, minPrice, maxPrice, capacity, amenities, sortBy } = req.query;
+    const { city, state, minPrice, maxPrice, capacity, amenities, equipment, minRating, sortBy } = req.query;
 
     const where: any = { isActive: true };
 
     if (city) {
       where.city = { contains: city as string, mode: 'insensitive' };
+    }
+
+    if (state) {
+      where.state = { contains: state as string, mode: 'insensitive' };
     }
 
     if (minPrice || maxPrice) {
@@ -105,19 +109,29 @@ export const searchStudios = async (req: Request, res: Response) => {
     }
 
     if (amenities) {
-      const amenitiesArray = (amenities as string).split(',');
-      where.amenities = { hasEvery: amenitiesArray };
+      const amenitiesArray = (amenities as string).split(',').filter(a => a.trim());
+      if (amenitiesArray.length > 0) {
+        where.amenities = { hasSome: amenitiesArray };
+      }
+    }
+
+    if (equipment) {
+      const equipmentArray = (equipment as string).split(',').filter(e => e.trim());
+      if (equipmentArray.length > 0) {
+        where.equipment = { hasSome: equipmentArray };
+      }
     }
 
     let orderBy: any = { createdAt: 'desc' };
     if (sortBy === 'price_asc') orderBy = { pricePerHour: 'asc' };
     if (sortBy === 'price_desc') orderBy = { pricePerHour: 'desc' };
+    if (sortBy === 'name') orderBy = { name: 'asc' };
 
     const studios = await prisma.studio.findMany({
       where,
       include: {
         owner: {
-          select: { id: true, fullName: true, profileImage: true },
+          select: { id: true, fullName: true, profileImage: true, isVerified: true },
         },
         reviews: {
           select: { rating: true },
@@ -139,7 +153,14 @@ export const searchStudios = async (req: Request, res: Response) => {
       };
     });
 
-    res.json({ studios: studiosWithRatings, count: studiosWithRatings.length });
+    // Filter by minimum rating if provided
+    let filteredStudios = studiosWithRatings;
+    if (minRating) {
+      const minRatingValue = parseFloat(minRating as string);
+      filteredStudios = studiosWithRatings.filter(s => s.averageRating >= minRatingValue);
+    }
+
+    res.json({ studios: filteredStudios, count: filteredStudios.length });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });

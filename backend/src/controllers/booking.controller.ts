@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../middleware/auth.middleware';
+import { sendBookingConfirmation, sendOwnerNotification } from '../services/email.service';
+import { io } from '../server';
 
 const prisma = new PrismaClient();
 const PLATFORM_FEE_PERCENTAGE = 0.15; // 15% commission
@@ -102,8 +104,55 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
           },
         },
         payment: true,
+        creator: {
+          select: { fullName: true, email: true },
+        },
       },
     });
+
+    // Send email notifications
+    try {
+      // Email to customer
+      await sendBookingConfirmation(booking.creator.email, {
+        customerName: booking.creator.fullName,
+        studioName: booking.studio.name,
+        date: booking.bookingDate.toLocaleDateString(),
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        totalPrice: booking.totalPrice,
+        bookingId: booking.id,
+      });
+
+      // Email to studio owner
+      await sendOwnerNotification(booking.studio.owner.email, {
+        ownerName: booking.studio.owner.fullName,
+        customerName: booking.creator.fullName,
+        studioName: booking.studio.name,
+        date: booking.bookingDate.toLocaleDateString(),
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        earnings: booking.studioEarnings,
+      });
+    } catch (emailError) {
+      console.error('Failed to send email notifications:', emailError);
+      // Don't fail the booking if email fails
+    }
+
+    // Emit socket event to studio owner
+    io.to(`owner-${booking.studio.ownerId}`).emit('new-booking', {
+      booking: {
+        id: booking.id,
+        customerName: booking.creator.fullName,
+        studioName: booking.studio.name,
+        date: booking.bookingDate,
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        totalPrice: booking.totalPrice,
+      },
+    });
+
+    // Emit to studio room for real-time calendar updates
+    io.to(`studio-${booking.studioId}`).emit('booking-created', booking);
 
     res.status(201).json({ message: 'Booking created successfully', booking });
   } catch (error) {

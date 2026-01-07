@@ -1,0 +1,248 @@
+import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
+import { io } from '../server';
+
+const prisma = new PrismaClient();
+
+// Send a message
+export const sendMessage = async (req: Request, res: Response) => {
+  try {
+    const senderId = req.user?.id;
+    const { receiverId, studioId, content } = req.body;
+
+    if (!senderId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    if (!content || content.trim() === '') {
+      return res.status(400).json({ message: 'Message content is required' });
+    }
+
+    // Create the message
+    const message = await prisma.message.create({
+      data: {
+        senderId,
+        receiverId,
+        studioId,
+        content: content.trim(),
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+        receiver: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+        studio: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    // Emit real-time event to receiver
+    io.to(`user-${receiverId}`).emit('new-message', message);
+
+    res.status(201).json({
+      message: 'Message sent successfully',
+      data: message,
+    });
+  } catch (error) {
+    console.error('Error sending message:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Get all conversations for a user
+export const getConversations = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    // Get all messages where user is sender or receiver
+    const messages = await prisma.message.findMany({
+      where: {
+        OR: [{ senderId: userId }, { receiverId: userId }],
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+        receiver: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+        studio: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // Group messages by conversation (other user + studio combination)
+    const conversationsMap = new Map<string, any>();
+
+    messages.forEach((message) => {
+      const otherUserId = message.senderId === userId ? message.receiverId : message.senderId;
+      const conversationKey = `${otherUserId}-${message.studioId || 'general'}`;
+
+      if (!conversationsMap.has(conversationKey)) {
+        conversationsMap.set(conversationKey, {
+          otherUser: message.senderId === userId ? message.receiver : message.sender,
+          studio: message.studio,
+          lastMessage: message,
+          unreadCount: 0,
+        });
+      }
+
+      // Count unread messages (messages sent to current user that are unread)
+      if (message.receiverId === userId && !message.read) {
+        const conversation = conversationsMap.get(conversationKey);
+        conversation.unreadCount += 1;
+      }
+    });
+
+    const conversations = Array.from(conversationsMap.values());
+
+    res.json({
+      message: 'Conversations fetched successfully',
+      data: conversations,
+    });
+  } catch (error) {
+    console.error('Error fetching conversations:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Get messages for a specific conversation
+export const getMessages = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { conversationId } = req.params; // Format: "otherUserId-studioId"
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const [otherUserId, studioIdentifier] = conversationId.split('-');
+    const studioId = studioIdentifier === 'general' ? null : studioIdentifier;
+
+    // Fetch messages between the two users for the specific studio
+    const messages = await prisma.message.findMany({
+      where: {
+        AND: [
+          {
+            OR: [
+              { senderId: userId, receiverId: otherUserId },
+              { senderId: otherUserId, receiverId: userId },
+            ],
+          },
+          studioId ? { studioId } : { studioId: null },
+        ],
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+        receiver: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            profilePicture: true,
+          },
+        },
+        studio: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+
+    res.json({
+      message: 'Messages fetched successfully',
+      data: messages,
+    });
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Mark a message as read
+export const markAsRead = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { messageId } = req.params;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    // Verify the message is for this user
+    const message = await prisma.message.findUnique({
+      where: { id: messageId },
+    });
+
+    if (!message) {
+      return res.status(404).json({ message: 'Message not found' });
+    }
+
+    if (message.receiverId !== userId) {
+      return res.status(403).json({ message: 'Not authorized to mark this message as read' });
+    }
+
+    // Update the message
+    const updatedMessage = await prisma.message.update({
+      where: { id: messageId },
+      data: { read: true },
+    });
+
+    res.json({
+      message: 'Message marked as read',
+      data: updatedMessage,
+    });
+  } catch (error) {
+    console.error('Error marking message as read:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
