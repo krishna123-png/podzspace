@@ -75,10 +75,13 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   const loadMessages = async () => {
     try {
       const conversationId = `${receiverId}-${studioId || 'general'}`
+      console.log('ChatBox: Loading messages for conversation:', conversationId)
       const response = await api.get(`/messages/${conversationId}`)
-      setMessages(response.data.data)
+      console.log('ChatBox: Messages loaded:', response.data.data?.length || 0)
+      setMessages(response.data.data || [])
     } catch (error) {
-      console.error('Failed to load messages:', error)
+      console.error('ChatBox: Failed to load messages:', error)
+      setMessages([])
     }
   }
 
@@ -136,6 +139,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
           ) : (
             messages.map((message) => {
               const isOwnMessage = message.senderId === user?.id
+              console.log('ChatBox: Rendering message', message.id, 'senderId:', message.senderId, 'currentUser:', user?.id, 'isOwn:', isOwnMessage)
               return (
                 <div
                   key={message.id}

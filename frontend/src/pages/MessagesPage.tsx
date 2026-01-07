@@ -57,6 +57,7 @@ const MessagesPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
 
   // Initialize auth on mount
@@ -136,16 +137,19 @@ const MessagesPage: React.FC = () => {
   };
 
   const fetchMessages = async (conversationId: string) => {
+    setLoadingMessages(true);
     try {
       console.log('Fetching messages for conversation:', conversationId);
       const response = await api.get(`/messages/${conversationId}`);
       console.log('Messages response:', response.data);
+      console.log('Number of messages:', response.data.data?.length || 0);
       setMessages(response.data.data || []);
 
       // Mark all unread messages as read
       const unreadMessages = (response.data.data || []).filter(
         (msg: Message) => msg.receiverId === user?.id && !msg.isRead
       );
+      console.log('Marking', unreadMessages.length, 'messages as read');
       for (const msg of unreadMessages) {
         api.patch(`/messages/${msg.id}/read`).catch(console.error);
       }
@@ -154,6 +158,8 @@ const MessagesPage: React.FC = () => {
       console.error('Error details:', error.response?.data);
       toast.error('Failed to load messages');
       setMessages([]);
+    } finally {
+      setLoadingMessages(false);
     }
   };
 
@@ -337,32 +343,46 @@ const MessagesPage: React.FC = () => {
 
                   {/* Messages */}
                   <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-                    {messages.map((message) => {
-                      const isOwnMessage = message.senderId === user?.id;
-                      return (
-                        <div
-                          key={message.id}
-                          className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
-                        >
+                    {loadingMessages ? (
+                      <div className="flex items-center justify-center h-full">
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+                          <p className="mt-2 text-gray-600 text-sm">Loading messages...</p>
+                        </div>
+                      </div>
+                    ) : messages.length === 0 ? (
+                      <div className="flex items-center justify-center h-full">
+                        <p className="text-gray-500">No messages yet. Start the conversation!</p>
+                      </div>
+                    ) : (
+                      messages.map((message) => {
+                        const isOwnMessage = message.senderId === user?.id;
+                        console.log('Rendering message:', message.id, 'senderId:', message.senderId, 'currentUserId:', user?.id, 'isOwn:', isOwnMessage);
+                        return (
                           <div
-                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                              isOwnMessage
-                                ? 'bg-indigo-600 text-white'
-                                : 'bg-white text-gray-900 border border-gray-200'
-                            }`}
+                            key={message.id}
+                            className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                           >
-                            <p className="break-words">{message.content}</p>
-                            <p
-                              className={`text-xs mt-1 ${
-                                isOwnMessage ? 'text-indigo-200' : 'text-gray-400'
+                            <div
+                              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                                isOwnMessage
+                                  ? 'bg-indigo-600 text-white'
+                                  : 'bg-white text-gray-900 border border-gray-200'
                               }`}
                             >
-                              {new Date(message.createdAt).toLocaleTimeString()}
-                            </p>
+                              <p className="break-words">{message.content}</p>
+                              <p
+                                className={`text-xs mt-1 ${
+                                  isOwnMessage ? 'text-indigo-200' : 'text-gray-400'
+                                }`}
+                              >
+                                {new Date(message.createdAt).toLocaleTimeString()}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    )}
                     <div ref={messagesEndRef} />
                   </div>
 
