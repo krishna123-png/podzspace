@@ -49,7 +49,7 @@ interface Conversation {
 
 const MessagesPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, checkAuth, isAuthenticated } = useAuthStore();
   const socket = useSocket();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -58,6 +58,17 @@ const MessagesPage: React.FC = () => {
   const [messageInput, setMessageInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+
+  // Initialize auth on mount
+  useEffect(() => {
+    const initAuth = async () => {
+      if (!user && isAuthenticated) {
+        console.log('User not loaded but authenticated, calling checkAuth');
+        await checkAuth();
+      }
+    };
+    initAuth();
+  }, []);
 
   // Join user's personal room for real-time messages
   useEffect(() => {
@@ -109,20 +120,26 @@ const MessagesPage: React.FC = () => {
 
   const fetchConversations = async () => {
     try {
+      console.log('Fetching conversations...');
       const response = await api.get('/messages/conversations');
+      console.log('Conversations response:', response.data);
       setConversations(response.data.data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch conversations:', error);
+      console.error('Error details:', error.response?.data);
       toast.error('Failed to load conversations');
       setConversations([]);
     } finally {
+      console.log('Setting loading to false');
       setLoading(false);
     }
   };
 
   const fetchMessages = async (conversationId: string) => {
     try {
+      console.log('Fetching messages for conversation:', conversationId);
       const response = await api.get(`/messages/${conversationId}`);
+      console.log('Messages response:', response.data);
       setMessages(response.data.data || []);
 
       // Mark all unread messages as read
@@ -132,18 +149,26 @@ const MessagesPage: React.FC = () => {
       for (const msg of unreadMessages) {
         api.patch(`/messages/${msg.id}/read`).catch(console.error);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch messages:', error);
+      console.error('Error details:', error.response?.data);
       toast.error('Failed to load messages');
       setMessages([]);
     }
   };
 
+  }, []);
+
   useEffect(() => {
     if (user) {
+      console.log('Fetching conversations for user:', user.id);
       fetchConversations();
+    } else if (!isAuthenticated) {
+      console.log('No authentication, redirecting to login');
+      setLoading(false);
+      navigate('/login');
     }
-  }, [user]);
+  }, [user]); // Trigger when user is loaded
 
   useEffect(() => {
     if (selectedConversation) {
