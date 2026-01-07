@@ -160,7 +160,12 @@ export const getMessages = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
-    const [otherUserId, studioIdentifier] = conversationId.split('-');
+    console.log(`ConversationId received: ${conversationId}`);
+    
+    // UUIDs are 36 characters (with dashes), so we need to split properly
+    // Format: "uuid-uuid" or "uuid-general"
+    const otherUserId = conversationId.substring(0, 36);
+    const studioIdentifier = conversationId.substring(37); // After the UUID and separator dash
     const studioId = studioIdentifier === 'general' ? null : studioIdentifier;
 
     console.log(`Fetching messages: userId=${userId}, otherUserId=${otherUserId}, studioId=${studioId}`);
