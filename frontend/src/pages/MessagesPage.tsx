@@ -157,8 +157,6 @@ const MessagesPage: React.FC = () => {
     }
   };
 
-  }, []);
-
   useEffect(() => {
     if (user) {
       console.log('Fetching conversations for user:', user.id);
