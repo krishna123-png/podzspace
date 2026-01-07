@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Search, Mic2, Calendar, Star, Shield, Headphones, MapPin, DollarSign, CheckCircle, ArrowRight, Heart } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
@@ -7,7 +7,8 @@ import { useAuthStore } from '@/store/authStore'
 import toast from 'react-hot-toast'
 
 const HomePage = () => {
-  const { isAuthenticated } = useAuthStore()
+  const navigate = useNavigate()
+  const { isAuthenticated, user } = useAuthStore()
   const [featuredStudios, setFeaturedStudios] = useState<any[]>([])
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
 
@@ -66,6 +67,45 @@ const HomePage = () => {
     }
   }
 
+  const handleListYourStudio = () => {
+    if (!isAuthenticated) {
+      // Not logged in - go to login
+      navigate('/login')
+      return
+    }
+
+    if (user?.role === 'CREATOR') {
+      // User is creator - show message and offer to register as owner
+      toast.error(
+        <div>
+          <p className="font-semibold mb-2">Switch to Studio Owner Account</p>
+          <p className="text-sm mb-3">You need a Studio Owner account to list studios.</p>
+          <button
+            onClick={() => navigate('/register')}
+            className="text-xs bg-white text-primary-600 px-3 py-1 rounded hover:bg-gray-100"
+          >
+            Create Owner Account
+          </button>
+        </div>,
+        { duration: 6000 }
+      )
+      return
+    }
+
+    // User is studio owner - go to add studio
+    navigate('/add-studio')
+  }
+
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      // Logged in - go to dashboard
+      navigate('/dashboard')
+    } else {
+      // Not logged in - go to register
+      navigate('/register')
+    }
+  }
+
   return (
     <div className="bg-white">
       {/* Hero Section */}
@@ -90,9 +130,12 @@ const HomePage = () => {
                   <Search className="inline h-5 w-5 mr-2" />
                   Find Studios
                 </Link>
-                <Link to="/register" className="btn btn-outline text-lg px-8 py-4 hover-lift">
+                <button
+                  onClick={handleListYourStudio}
+                  className="btn btn-outline text-lg px-8 py-4 hover-lift"
+                >
                   List Your Studio
-                </Link>
+                </button>
               </div>
               
               {/* Stats */}
@@ -342,10 +385,13 @@ const HomePage = () => {
                   </div>
                 ))}
               </div>
-              <Link to="/register" className="btn bg-white text-primary-600 hover:bg-gray-100 text-lg px-8 py-4 inline-flex items-center">
+              <button
+                onClick={handleGetStarted}
+                className="btn bg-white text-primary-600 hover:bg-gray-100 text-lg px-8 py-4 inline-flex items-center"
+              >
                 Get Started Free
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
+              </button>
             </div>
             <div className="hidden lg:block">
               <img
