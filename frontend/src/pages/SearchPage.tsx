@@ -124,7 +124,7 @@ const SearchPage = () => {
                 />
                 <button
                   onClick={(e) => toggleFavorite(e, studio.id)}
-                  className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
+                  className="absolute top-3 left-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
                 >
                   <Heart
                     className={`h-5 w-5 ${

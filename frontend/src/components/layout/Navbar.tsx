@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
-import { Mic2, Menu, X, User, LogOut, LayoutDashboard, Calendar } from 'lucide-react'
+import { Mic2, Menu, X, User, LogOut, LayoutDashboard, Calendar, Heart, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 
 const Navbar = () => {
@@ -80,6 +80,22 @@ const Navbar = () => {
                       <span>My Bookings</span>
                     </Link>
                     <Link
+                      to="/favorites"
+                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+                      onClick={() => setProfileMenuOpen(false)}
+                    >
+                      <Heart className="h-4 w-4" />
+                      <span>My Favorites</span>
+                    </Link>
+                    <Link
+                      to="/messages"
+                      className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+                      onClick={() => setProfileMenuOpen(false)}
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      <span>Messages</span>
+                    </Link>
+                    <Link
                       to="/profile"
                       className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
                       onClick={() => setProfileMenuOpen(false)}
@@ -153,6 +169,20 @@ const Navbar = () => {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     My Bookings
+                  </Link>
+                  <Link
+                    to="/favorites"
+                    className="text-gray-700 hover:text-primary-600 transition font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    My Favorites
+                  </Link>
+                  <Link
+                    to="/messages"
+                    className="text-gray-700 hover:text-primary-600 transition font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Messages
                   </Link>
                   <button onClick={handleLogout} className="text-left text-red-600 font-medium">
                     Logout

@@ -1,8 +1,8 @@
 // Placeholder - Studio detail with booking
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { studiosAPI, bookingsAPI, paymentsAPI } from '@/lib/api'
-import { MapPin, Star, X, CreditCard } from 'lucide-react'
+import { studiosAPI, bookingsAPI, paymentsAPI, favoritesAPI } from '@/lib/api'
+import { MapPin, Star, X, CreditCard, Heart, MessageCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuthStore } from '@/store/authStore'
 
@@ -23,10 +23,25 @@ const StudioDetailPage = () => {
   const [cardNumber, setCardNumber] = useState('')
   const [upiId, setUpiId] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isFavorited, setIsFavorited] = useState(false)
 
   useEffect(() => {
-    if (id) loadStudio()
-  }, [id])
+    if (id) {
+      loadStudio()
+      if (isAuthenticated) {
+        checkFavorite()
+      }
+    }
+  }, [id, isAuthenticated])
+
+  const checkFavorite = async () => {
+    try {
+      const response = await favoritesAPI.check(id!)
+      setIsFavorited(response.data.isFavorite)
+    } catch (error) {
+      console.error('Failed to check favorite:', error)
+    }
+  }
 
   const loadStudio = async () => {
     try {
@@ -34,6 +49,28 @@ const StudioDetailPage = () => {
       setStudio(response.data.studio)
     } catch (error) {
       console.error(error)
+    }
+  }
+
+  const toggleFavorite = async () => {
+    if (!isAuthenticated) {
+      toast.error('Please login to add favorites')
+      navigate('/login')
+      return
+    }
+
+    try {
+      if (isFavorited) {
+        await favoritesAPI.remove(id!)
+        setIsFavorited(false)
+        toast.success('Removed from favorites')
+      } else {
+        await favoritesAPI.add(id!)
+        setIsFavorited(true)
+        toast.success('Added to favorites')
+      }
+    } catch (error) {
+      toast.error('Failed to update favorites')
     }
   }
 
@@ -160,11 +197,25 @@ const StudioDetailPage = () => {
       <div className="section-container">
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <img
-            src={studio.images[0] || 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800'}
-            alt={studio.name}
-            className="w-full h-96 object-cover rounded-xl mb-6"
-          />
+          <div className="relative">
+            <img
+              src={studio.images[0] || 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800'}
+              alt={studio.name}
+              className="w-full h-96 object-cover rounded-xl mb-6"
+            />
+            <button
+              onClick={toggleFavorite}
+              className="absolute top-4 left-4 p-3 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
+            >
+              <Heart
+                className={`h-6 w-6 ${
+                  isFavorited
+                    ? 'text-red-500 fill-red-500'
+                    : 'text-gray-600'
+                }`}
+              />
+            </button>
+          </div>
           <h1 className="text-4xl font-bold mb-4">{studio.name}</h1>
           <div className="flex items-center text-gray-600 mb-4">
             <MapPin className="h-5 w-5 mr-2" />
@@ -196,6 +247,13 @@ const StudioDetailPage = () => {
               <input type="time" value={bookingData.startTime} onChange={(e) => setBookingData({...bookingData, startTime: e.target.value})} className="input" />
               <input type="time" value={bookingData.endTime} onChange={(e) => setBookingData({...bookingData, endTime: e.target.value})} className="input" />
               <button onClick={handleBooking} className="btn btn-primary w-full">Book Now</button>
+              <button 
+                onClick={() => navigate('/messages')} 
+                className="btn btn-secondary w-full flex items-center justify-center space-x-2"
+              >
+                <MessageCircle className="h-5 w-5" />
+                <span>Contact Owner</span>
+              </button>
             </div>
           </div>
         </div>
