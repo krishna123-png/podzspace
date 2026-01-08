@@ -321,11 +321,11 @@ const MessagesPage: React.FC = () => {
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-h-0">
               {selectedConversation ? (
                 <>
                   {/* Chat Header */}
-                  <div className="p-4 border-b border-gray-200 bg-white">
+                  <div className="p-4 border-b border-gray-200 bg-white flex-shrink-0">
                     <div className="flex items-center space-x-3">
                       <button
                         onClick={() => setSelectedConversation(null)}
@@ -405,7 +405,7 @@ const MessagesPage: React.FC = () => {
                   </div>
 
                   {/* Message Input */}
-                  <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-gray-200">
+                  <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-gray-200 flex-shrink-0">
                     <div className="flex space-x-2">
                       <input
                         type="text"
