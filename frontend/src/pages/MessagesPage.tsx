@@ -112,7 +112,7 @@ const MessagesPage: React.FC = () => {
   }, [socket, selectedConversation, user]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
   };
 
   useEffect(() => {
@@ -238,7 +238,7 @@ const MessagesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="bg-gray-50 py-4 md:py-8 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-center">
           <button
@@ -251,7 +251,7 @@ const MessagesPage: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="flex flex-col md:flex-row h-[600px] md:h-[600px]">
+          <div className="flex flex-col md:flex-row h-[calc(100vh-200px)] md:h-[600px]">
             {/* Conversations List */}
             <div className={`w-full md:w-1/3 border-r border-gray-200 overflow-y-auto h-full ${
               selectedConversation ? 'hidden md:block' : 'block'
