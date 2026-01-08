@@ -251,9 +251,9 @@ const MessagesPage: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="flex flex-col md:flex-row h-[600px]">
+          <div className="flex flex-col md:flex-row h-[600px] md:h-[600px]">
             {/* Conversations List */}
-            <div className={`w-full md:w-1/3 border-r border-gray-200 overflow-y-auto ${
+            <div className={`w-full md:w-1/3 border-r border-gray-200 overflow-y-auto h-full ${
               selectedConversation ? 'hidden md:block' : 'block'
             }`}>
               {conversations.length === 0 ? (
