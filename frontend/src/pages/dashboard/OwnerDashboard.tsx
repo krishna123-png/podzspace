@@ -269,7 +269,7 @@ const OwnerDashboard = () => {
           </button>
 
           <button
-            onClick={() => navigate('/my-studios')}
+            onClick={() => navigate('/my-bookings')}
             className="bg-white rounded-lg p-6 hover:shadow-lg transition-shadow text-left group"
           >
             <Calendar className="h-8 w-8 text-blue-600 mb-3 group-hover:scale-110 transition-transform" />
