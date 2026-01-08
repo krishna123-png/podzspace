@@ -405,22 +405,22 @@ const MessagesPage: React.FC = () => {
                   </div>
 
                   {/* Message Input */}
-                  <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-gray-200 flex-shrink-0">
-                    <div className="flex space-x-2">
+                  <form onSubmit={handleSendMessage} className="p-2 sm:p-4 bg-white border-t border-gray-200 flex-shrink-0">
+                    <div className="flex gap-2 items-center">
                       <input
                         type="text"
                         value={messageInput}
                         onChange={(e) => setMessageInput(e.target.value)}
-                        placeholder="Type a message..."
-                        className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base"
+                        placeholder="Type your message..."
+                        className="flex-1 min-w-0 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base"
                         disabled={sending}
                       />
                       <button
                         type="submit"
                         disabled={sending || !messageInput.trim()}
-                        className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[44px] sm:min-w-0 sm:px-6"
+                        className="flex-shrink-0 w-10 h-10 sm:w-auto sm:h-auto sm:px-6 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                       >
-                        <Send className="h-5 w-5" />
+                        <Send className="h-5 w-5 flex-shrink-0" />
                         <span className="hidden sm:inline sm:ml-2">Send</span>
                       </button>
                     </div>
