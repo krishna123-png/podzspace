@@ -74,19 +74,20 @@ const OwnerDashboard = () => {
   return (
     <div className="section-container">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
             Welcome back, {user?.fullName?.split(' ')[0]}! 🎵
           </h1>
-          <p className="text-gray-600 text-lg">Here's how your studios are performing</p>
+          <p className="text-gray-600 text-base sm:text-lg">Here's how your studios are performing</p>
         </div>
         <button
           onClick={() => navigate('/add-studio')}
-          className="btn btn-primary flex items-center shadow-lg hover-lift"
+          className="btn btn-primary flex items-center shadow-lg hover-lift whitespace-nowrap px-4 sm:px-6"
         >
           <Plus className="h-5 w-5 mr-2" />
-          Add Studio
+          <span className="hidden xs:inline">Add Studio</span>
+          <span className="xs:hidden">Add</span>
         </button>
       </div>
 

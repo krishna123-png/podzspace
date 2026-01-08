@@ -251,9 +251,11 @@ const MessagesPage: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="flex h-[600px]">
+          <div className="flex flex-col md:flex-row h-[600px]">
             {/* Conversations List */}
-            <div className="w-1/3 border-r border-gray-200 overflow-y-auto">
+            <div className={`w-full md:w-1/3 border-r border-gray-200 overflow-y-auto ${
+              selectedConversation ? 'hidden md:block' : 'block'
+            }`}>
               {conversations.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
                   <p>No conversations yet</p>
@@ -325,6 +327,12 @@ const MessagesPage: React.FC = () => {
                   {/* Chat Header */}
                   <div className="p-4 border-b border-gray-200 bg-white">
                     <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => setSelectedConversation(null)}
+                        className="md:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
+                      >
+                        <ArrowLeft className="h-5 w-5 text-gray-600" />
+                      </button>
                       {selectedConversation.otherUser.profileImage ? (
                         <img
                           src={selectedConversation.otherUser.profileImage}
@@ -374,7 +382,7 @@ const MessagesPage: React.FC = () => {
                             className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                           >
                             <div
-                              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                              className={`max-w-[75%] sm:max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                                 isOwnMessage
                                   ? 'bg-indigo-600 text-white'
                                   : 'bg-white text-gray-900 border border-gray-200'
@@ -404,16 +412,16 @@ const MessagesPage: React.FC = () => {
                         value={messageInput}
                         onChange={(e) => setMessageInput(e.target.value)}
                         placeholder="Type a message..."
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm sm:text-base"
                         disabled={sending}
                       />
                       <button
                         type="submit"
                         disabled={sending || !messageInput.trim()}
-                        className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                        className="px-3 sm:px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1 sm:space-x-2"
                       >
                         <Send className="h-5 w-5" />
-                        <span>Send</span>
+                        <span className="hidden sm:inline">Send</span>
                       </button>
                     </div>
                   </form>

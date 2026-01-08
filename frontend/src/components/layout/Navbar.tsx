@@ -134,12 +134,33 @@ const Navbar = () => {
           </div>
 
           {/* Mobile menu button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-gray-700"
-          >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          <div className="md:hidden">
+            {isAuthenticated ? (
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="flex items-center space-x-2"
+              >
+                {user?.profileImage ? (
+                  <img
+                    src={user.profileImage}
+                    alt={user.fullName}
+                    className="h-10 w-10 rounded-full object-cover border-2 border-gray-200"
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-semibold">
+                    {user?.fullName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="text-gray-700"
+              >
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Mobile Menu */}
@@ -191,6 +212,13 @@ const Navbar = () => {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Messages
+                  </Link>
+                  <Link
+                    to="/profile"
+                    className="text-gray-700 hover:text-primary-600 transition font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Profile
                   </Link>
                   <button onClick={handleLogout} className="text-left text-red-600 font-medium">
                     Logout
