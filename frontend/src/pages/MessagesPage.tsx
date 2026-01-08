@@ -418,10 +418,10 @@ const MessagesPage: React.FC = () => {
                       <button
                         type="submit"
                         disabled={sending || !messageInput.trim()}
-                        className="px-3 sm:px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1 sm:space-x-2"
+                        className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[44px] sm:min-w-0 sm:px-6"
                       >
                         <Send className="h-5 w-5" />
-                        <span className="hidden sm:inline">Send</span>
+                        <span className="hidden sm:inline sm:ml-2">Send</span>
                       </button>
                     </div>
                   </form>
