@@ -22,6 +22,7 @@ import StudioCalendarPage from './pages/StudioCalendarPage'
 import AnalyticsDashboardPage from './pages/AnalyticsDashboardPage'
 import MessagesPage from './pages/MessagesPage'
 import FavoritesPage from './pages/FavoritesPage'
+import MyStudiosPage from './pages/MyStudiosPage'
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) => {
@@ -136,6 +137,14 @@ function App() {
           element={
             <ProtectedRoute>
               <FavoritesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="my-studios"
+          element={
+            <ProtectedRoute requiredRole="STUDIO_OWNER">
+              <MyStudiosPage />
             </ProtectedRoute>
           }
         />

@@ -33,13 +33,11 @@ const Navbar = () => {
               Find Studios
             </Link>
             {user?.role === 'STUDIO_OWNER' && (
-              <Link to="/dashboard" className="text-gray-700 hover:text-primary-600 transition font-medium">
+              <Link to="/my-studios" className="text-gray-700 hover:text-primary-600 transition font-medium">
                 My Studios
               </Link>
             )}
-            <Link to="/search?featured=true" className="text-gray-700 hover:text-primary-600 transition font-medium">
-              How It Works
-            </Link>
+
           </div>
 
           {/* Desktop Auth Buttons */}
@@ -176,7 +174,7 @@ const Navbar = () => {
               </Link>
               {user?.role === 'STUDIO_OWNER' && (
                 <Link
-                  to="/dashboard"
+                  to="/my-studios"
                   className="text-gray-700 hover:text-primary-600 transition font-medium"
                   onClick={() => setMobileMenuOpen(false)}
                 >
