@@ -4,6 +4,7 @@ import { useAuthStore } from './store/authStore'
 
 // Layout
 import Layout from './components/layout/Layout'
+import ScrollToTop from './components/ScrollToTop'
 
 // Pages
 import HomePage from './pages/HomePage'
@@ -52,7 +53,7 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Layout />}>
+      <Route path="/" element={<><ScrollToTop /><Layout /></>}>
         <Route index element={<HomePage />} />
         <Route path="search" element={<SearchPage />} />
         <Route path="studio/:id" element={<StudioDetailPage />} />
