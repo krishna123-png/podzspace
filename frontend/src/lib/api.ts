@@ -29,11 +29,19 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const message = error.response?.data?.error || 'Something went wrong'
+    const isAuthEndpoint = error.config?.url?.includes('/auth/login') || 
+                           error.config?.url?.includes('/auth/register')
     
     if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
-      toast.error('Session expired. Please login again.')
+      // If it's a login/register request, show the actual error message
+      if (isAuthEndpoint) {
+        toast.error(message)  // "Invalid credentials"
+      } else {
+        // For other 401s, it's a session expiry
+        localStorage.removeItem('token')
+        window.location.href = '/login'
+        toast.error('Session expired. Please login again.')
+      }
     } else {
       toast.error(message)
     }

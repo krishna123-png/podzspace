@@ -36,7 +36,7 @@ io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
   socket.on('join-studio', (studioId: string) => {
-    socket.join(`studio-${studioId}`);
+     socket.join(`studio-${studioId}`);
     console.log(`User ${socket.id} joined studio-${studioId}`);
   });
 
