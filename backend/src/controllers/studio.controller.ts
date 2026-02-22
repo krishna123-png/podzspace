@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../middleware/auth.middleware';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
 
 export const createStudio = async (req: AuthRequest, res: Response) => {
   try {

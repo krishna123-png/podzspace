@@ -6,9 +6,7 @@ import {
   transferToStudioOwner,
   createLinkedAccount 
 } from '../services/payment.service';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
 
 export const createPaymentOrder = async (req: AuthRequest, res: Response) => {
   try {

@@ -1,11 +1,9 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { uploadToCloudinary } from '../config/cloudinary';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
 
 export const register = async (req: Request, res: Response) => {
   try {

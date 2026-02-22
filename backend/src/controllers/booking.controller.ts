@@ -1,10 +1,8 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { sendBookingConfirmation, sendOwnerNotification } from '../services/email.service';
 import { io } from '../server';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
 const PLATFORM_FEE_PERCENTAGE = 0.15; // 15% commission
 
 export const createBooking = async (req: AuthRequest, res: Response) => {

@@ -1,9 +1,7 @@
 import { Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { uploadToCloudinary } from '../config/cloudinary';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma';
 
 export const updateProfile = async (req: AuthRequest, res: Response) => {
   try {
